@@ -151,3 +151,26 @@ jobs:
         with:
           artifact-id: ${{ steps.register-artifact.outputs.cbp_artifact_id }}
           labels: "main,maven,nexus"
+
+      - name: Publish Build Evidence
+        uses: cloudbees-io-gha/publish-evidence-item@v2
+        with:
+          content: |-
+            # Build Evidence Report
+
+            ## Artifact Details
+            - **Repository**: ${{ github.repository }}
+            - **Version**: ${{ steps.version.outputs.version }}
+            - **Artifact ID**: ${{ steps.register-artifact.outputs.cbp_artifact_id }}
+            - **Type**: Maven
+
+            ## Deployment
+            - **Target**: Nexus Repository
+            - **URL**: ${{ secrets.NEXUS_URL }}
+            - **Labels**: main, maven, nexus
+
+            ## Workflow Summary
+            - **Branch**: ${{ github.ref_name }}
+            - **Commit**: ${{ github.sha }}
+            - **Run**: ${{ github.run_number }}
+            - **Triggered by**: ${{ github.event_name }}
