@@ -138,9 +138,16 @@ jobs:
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
 
       - name: Register Build Artifacts in CloudBees Platform
+        id: register-artifact
         uses: cloudbees-io-gha/register-build-artifact@v3
         with:
           name: ${{ github.repository }}
           url: ${{ secrets.NEXUS_URL }}/repository/maven-releases/${{ github.repository }}
           version: ${{ steps.version.outputs.version }}
           type: Maven
+
+      - name: Add Labels to Artifact
+        uses: cloudbees-io-gha/label-artifact-version@v1
+        with:
+          artifact-id: ${{ steps.register-artifact.outputs.cbp_artifact_id }}
+          labels: "main,maven,nexus"
