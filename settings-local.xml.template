@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 
+                              http://maven.apache.org/xsd/settings-1.0.0.xsd">
+  
+  <!-- Local Maven settings for Nexus deployment testing -->
+  <!-- Copy this file to settings-local.xml and fill in your actual credentials -->
+  
+  <servers>
+    <server>
+      <id>nexus-releases</id>
+      <username>YOUR_NEXUS_USERNAME</username>
+      <password>YOUR_NEXUS_PASSWORD</password>
+    </server>
+    <server>
+      <id>nexus-snapshots</id>
+      <username>YOUR_NEXUS_USERNAME</username>
+      <password>YOUR_NEXUS_PASSWORD</password>
+    </server>
+  </servers>
+  
+  <!-- Optional: Configure your local Nexus URL if different from default -->
+  <profiles>
+    <profile>
+      <id>nexus</id>
+      <properties>
+        <nexus.url>https://your-nexus-server.com</nexus.url>
+        <nexus.releases.repository>maven-releases</nexus.releases.repository>
+        <nexus.snapshots.repository>maven-snapshots</nexus.snapshots.repository>
+      </properties>
+    </profile>
+  </profiles>
+  
+  <activeProfiles>
+    <activeProfile>nexus</activeProfile>
+  </activeProfiles>
+  
+</settings>

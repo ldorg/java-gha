@@ -96,6 +96,9 @@ docker-compose.override.local.yml
 .env.local
 .env.production
 
+# Maven settings for local deployment (contains credentials)
+settings-local.xml
+
 # Node modules (if any)
 node_modules/
 npm-debug.log*
