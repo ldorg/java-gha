@@ -82,6 +82,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, lint]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -110,14 +113,24 @@ jobs:
             }]
 
       - name: Set version from Git
+        id: version
         run: |
           COMMIT_COUNT=$(git rev-list --count HEAD)
           SHORT_SHA=$(git rev-parse --short HEAD)
           NEW_VERSION="1.0.0-${COMMIT_COUNT}-${SHORT_SHA}"
           echo "Setting version to: $NEW_VERSION"
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
           mvn versions:set -DnewVersion="$NEW_VERSION"
 
       - name: Build and Deploy to Nexus
         run: mvn clean deploy -DskipTests -Dnexus.url="${NEXUS_URL}"
         env:
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
+
+      - name: Register Build Artifacts in CloudBees Platform
+        uses: cloudbees-io-gha/register-build-artifact@v3
+        with:
+          name: ${{ github.repository }}
+          url: ${{ secrets.NEXUS_URL }}/repository/maven-releases/${{ github.repository }}
+          version: ${{ steps.version.outputs.version }}
+          type: Maven
