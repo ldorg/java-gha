@@ -14,6 +14,9 @@ jobs:
   test:
     name: Tests
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -53,6 +56,13 @@ jobs:
         with:
           file: ./target/site/jacoco/jacoco.xml
           fail_ci_if_error: false
+
+      - name: Publish Test Results to CloudBees Platform
+        uses: cloudbees-io-gha/publish-test-results@v2
+        if: success() || failure()
+        with:
+          test-type: junit
+          results-path: target/surefire-reports
 
   lint:
     name: Code Quality
