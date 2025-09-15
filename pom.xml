@@ -30,7 +30,6 @@
         <testcontainers.version>1.20.1</testcontainers.version>
 
         <!-- Nexus Repository Configuration -->
-        <nexus.url>https://nexus.example.com</nexus.url>
         <nexus.releases.repository>maven-releases</nexus.releases.repository>
         <nexus.snapshots.repository>maven-snapshots</nexus.snapshots.repository>
     </properties>

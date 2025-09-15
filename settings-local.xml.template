@@ -20,7 +20,7 @@
     </server>
   </servers>
   
-  <!-- Optional: Configure your local Nexus URL if different from default -->
+  <!-- Required: Configure your Nexus URL -->
   <profiles>
     <profile>
       <id>nexus</id>
