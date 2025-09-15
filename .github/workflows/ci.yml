@@ -17,6 +17,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      checks: write
 
     steps:
       - name: Checkout code
@@ -39,14 +40,6 @@ jobs:
       - name: Run tests
         run: mvn clean test
 
-      - name: Generate test report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: Maven Tests
-          path: target/surefire-reports/*.xml
-          reporter: java-junit
-
       - name: Code Coverage
         run: mvn jacoco:report
 
@@ -57,7 +50,7 @@ jobs:
           file: ./target/site/jacoco/jacoco.xml
           fail_ci_if_error: false
 
-      - name: Publish Test Results to CloudBees Platform
+      - name: Publish Test Results to CloudBees Unify
         uses: cloudbees-io-gha/publish-test-results@v2
         if: success() || failure()
         with:
