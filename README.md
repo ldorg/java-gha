@@ -329,6 +329,47 @@ logging:
 
 ## Deployment
 
+### Nexus Repository Publishing
+
+This project is configured to publish artifacts to a Nexus repository. The deployment process includes:
+
+- **Main JAR**: The executable Spring Boot application
+- **Sources JAR**: Source code for debugging and IDE integration
+- **Javadoc JAR**: Generated API documentation
+
+#### Automated Deployment
+
+Artifacts are automatically deployed to Nexus via GitHub Actions when:
+- Code is pushed to the `main` branch (as SNAPSHOT versions)
+- A version tag (e.g., `v1.0.0`) is pushed (as release versions)
+
+#### Manual Deployment
+
+To deploy manually:
+
+```bash
+# Set required environment variables
+export NEXUS_URL=https://your-nexus-server.com
+export NEXUS_USERNAME=your-username
+export NEXUS_PASSWORD=your-password
+
+# Deploy to Nexus
+./mvnw clean deploy -Pnexus-deploy -DskipTests
+```
+
+#### Configuration
+
+The following GitHub secrets must be configured for automated deployment:
+
+- `NEXUS_URL`: The base URL of your Nexus repository server
+- `NEXUS_USERNAME`: Username for Nexus authentication  
+- `NEXUS_PASSWORD`: Password or token for Nexus authentication
+
+#### Repository Structure
+
+- **Releases**: `${NEXUS_URL}/repository/maven-releases/`
+- **Snapshots**: `${NEXUS_URL}/repository/maven-snapshots/`
+
 ### Kubernetes Deployment
 
 ```yaml

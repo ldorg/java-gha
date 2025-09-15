@@ -1,0 +1,93 @@
+name: Deploy to Nexus
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '17'
+  MAVEN_OPTS: -Dmaven.repo.local=.m2/repository
+
+jobs:
+  deploy:
+    name: Deploy to Nexus Repository
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        cache: maven
+        server-id: nexus-releases
+        server-username: NEXUS_USERNAME
+        server-password: NEXUS_PASSWORD
+        
+    - name: Configure Maven settings for snapshots
+      run: |
+        mkdir -p ~/.m2
+        cat > ~/.m2/settings.xml << EOF
+        <settings>
+          <servers>
+            <server>
+              <id>nexus-releases</id>
+              <username>\${env.NEXUS_USERNAME}</username>
+              <password>\${env.NEXUS_PASSWORD}</password>
+            </server>
+            <server>
+              <id>nexus-snapshots</id>
+              <username>\${env.NEXUS_USERNAME}</username>
+              <password>\${env.NEXUS_PASSWORD}</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+    
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Run tests
+      run: mvn clean test
+      
+    - name: Set version for snapshot or release
+      run: |
+        if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+          # For main branch, use SNAPSHOT version
+          mvn versions:set -DnewVersion=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout | sed 's/-SNAPSHOT//')-SNAPSHOT
+        else
+          # For tags, use release version (remove -SNAPSHOT if present)
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          mvn versions:set -DnewVersion=$TAG_VERSION
+        fi
+        mvn versions:commit
+    
+    - name: Build and package
+      run: mvn clean package -DskipTests
+      
+    - name: Deploy to Nexus
+      run: mvn deploy -DskipTests -Pnexus-deploy
+      env:
+        NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+        NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+        NEXUS_URL: ${{ secrets.NEXUS_URL }}
+    
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: deployment-artifacts
+        path: |
+          target/*.jar
+          target/*.pom
+        retention-days: 30
