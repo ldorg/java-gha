@@ -1,0 +1,30 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{java,xml,yml,yaml,json}]
+indent_style = space
+indent_size = 4
+
+[*.{md,txt}]
+trim_trailing_whitespace = false
+
+[*.{sh,bat,cmd}]
+indent_style = space
+indent_size = 2
+
+[Dockerfile*]
+indent_style = space
+indent_size = 2
+
+[docker-compose*.yml]
+indent_style = space
+indent_size = 2
+
+[.github/workflows/*.yml]
+indent_style = space
+indent_size = 2

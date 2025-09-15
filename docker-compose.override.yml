@@ -1,0 +1,20 @@
+# Override for development environment
+version: '3.8'
+
+services:
+  app:
+    build:
+      target: production
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - JAVA_OPTS=-Xmx256m -Xms128m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    ports:
+      - "8080:8080"
+      - "5005:5005"  # Debug port
+    volumes:
+      - ./logs:/app/logs
+      - ./target:/app/target  # For hot reload in development
+    command: ["sh", "-c", "java $$JAVA_OPTS -jar app.jar"]
+    depends_on:
+      - postgres
+      - redis
