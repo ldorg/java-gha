@@ -136,7 +136,7 @@ jobs:
         uses: cloudbees-io-gha/register-build-artifact@v3
         with:
           name: ${{ github.repository }}
-          url: ${{ secrets.NEXUS_URL }}/repository/maven-releases/${{ github.repository }}
+          url: ${{ secrets.NEXUS_URL }}/repository/maven-releases/com/example/java-gha/${{ steps.version.outputs.version }}/java-gha-${{ steps.version.outputs.version }}.jar
           version: ${{ steps.version.outputs.version }}
           type: Maven
 
