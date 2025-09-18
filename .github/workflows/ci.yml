@@ -102,6 +102,7 @@ jobs:
         with:
           api-token: ${{ secrets.BLACK_DUCK_TOKEN }}
           server-url: ${{ vars.BLACK_DUCK_URL }}
+          project-name: java-gha
 
   build-and-deploy:
     runs-on: ubuntu-latest
