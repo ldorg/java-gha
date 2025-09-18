@@ -87,9 +87,25 @@ jobs:
         run: mvn spotbugs:check
         continue-on-error: true
 
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan with Black Duck SCA
+        uses: cloudbees-io-gha/black-duck-scan-publish@v2
+        with:
+          api-token: ${{ secrets.BLACK_DUCK_TOKEN }}
+          server-url: ${{ vars.BLACK_DUCK_URL }}
+
   build-and-deploy:
     runs-on: ubuntu-latest
-    needs: [test, lint]
+    needs: [test, lint, scan]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       id-token: write
