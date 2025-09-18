@@ -40,14 +40,6 @@ jobs:
       - name: Run tests
         run: mvn clean test
 
-      - name: Generate test report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: Maven Tests
-          path: target/surefire-reports/*.xml
-          reporter: java-junit
-
       - name: Code Coverage
         run: mvn jacoco:report
 
@@ -58,6 +50,13 @@ jobs:
           file: ./target/site/jacoco/jacoco.xml
           fail_ci_if_error: false
 
+      # ========================================
+      # CloudBees Action: Publish Test Results to CloudBees Unify
+      # ----------------------------------------
+      # Update test-type and results-path to match your test framework and output location
+      #
+      # Docs: https://github.com/cloudbees-io-gha/publish-test-results
+      # ========================================
       - name: Publish Test Results to CloudBees Unify
         uses: cloudbees-io-gha/publish-test-results@v2
         if: success() || failure()
@@ -97,11 +96,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # ========================================
+      # CloudBees Action: Black Duck SCA Security Scanning
+      # ----------------------------------------
+      # Requires variables: BLACK_DUCK_URL
+      # Requires secrets: BLACK_DUCK_TOKEN
+      # Update project-name to match your project
+      #
+      # Docs: https://github.com/cloudbees-io-gha/black-duck-scan-publish
+      # ========================================
       - name: Scan with Black Duck SCA
         uses: cloudbees-io-gha/black-duck-scan-publish@v2
         with:
-          api-token: ${{ secrets.BLACK_DUCK_TOKEN }}
           server-url: ${{ vars.BLACK_DUCK_URL }}
+          api-token: ${{ secrets.BLACK_DUCK_TOKEN }}
           project-name: java-gha
 
   build-and-deploy:
@@ -153,6 +161,15 @@ jobs:
         env:
           NEXUS_URL: ${{ secrets.NEXUS_URL }}
 
+      # ========================================
+      # CloudBees Action: Register Build Artifacts
+      # ----------------------------------------
+      # Registers build artifacts with CloudBees Platform for artifact tracking and deployment
+      # Update parameters based on your artifact type and target repository
+      # The `type` field is an optional field to help convey what type it is
+      #
+      # Docs: https://github.com/cloudbees-io-gha/register-build-artifact
+      # ========================================
       - name: Register Build Artifacts in CloudBees Platform
         id: register-artifact
         uses: cloudbees-io-gha/register-build-artifact@v3
@@ -162,12 +179,30 @@ jobs:
           version: ${{ steps.version.outputs.version }}
           type: Maven
 
+      # ========================================
+      # CloudBees Action: Label Artifact Version
+      # ----------------------------------------
+      # Adds metadata labels to registered artifacts for organization and filtering
+      # Requires artifact-id from the register-build-artifact step
+      # Update labels to match your tagging strategy
+      #
+      # Docs: https://github.com/cloudbees-io-gha/label-artifact-version
+      # ========================================
       - name: Add Labels to Artifact
         uses: cloudbees-io-gha/label-artifact-version@v1
         with:
           artifact-id: ${{ steps.register-artifact.outputs.cbp_artifact_id }}
           labels: "main,maven,nexus"
 
+      # ========================================
+      # CloudBees Action: Publish Build Evidence
+      # ----------------------------------------
+      # Creates audit trail and compliance documentation for the build process
+      # Content can be customized to include contextual information
+      # Supports markdown formatting
+      #
+      # Docs: https://github.com/cloudbees-io-gha/publish-evidence-item
+      # ========================================
       - name: Publish Build Evidence
         uses: cloudbees-io-gha/publish-evidence-item@v2
         with:
