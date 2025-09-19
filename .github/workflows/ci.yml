@@ -13,7 +13,7 @@ env:
 
 jobs:
   test:
-    runs-on: runner-test
+    runs-on: [runner-test]
     permissions:
       id-token: write
       contents: read
@@ -66,7 +66,7 @@ jobs:
           results-path: target/surefire-reports
 
   lint:
-    runs-on: runner-test
+    runs-on: [runner-test]
     needs: [ test ]
 
     steps:
@@ -89,7 +89,7 @@ jobs:
         continue-on-error: true
 
   build-and-deploy:
-    runs-on: runner-test
+    runs-on: [runner-test]
     needs: [test, lint]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
